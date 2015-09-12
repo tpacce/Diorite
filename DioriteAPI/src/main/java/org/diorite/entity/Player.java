@@ -284,6 +284,11 @@ public interface Player extends LivingEntity, PlayerCommandSender, InventoryHold
     }
 
     /**
+     * Returns a boolean value if a player has premium
+     */
+    boolean hasPremium();
+
+    /**
      * Returns this player random instance;
      *
      * @return this player random instance

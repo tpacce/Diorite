@@ -52,6 +52,7 @@ import org.diorite.utils.math.DioriteRandom;
 import org.diorite.utils.math.DioriteRandomUtils;
 import org.diorite.utils.math.geometry.ImmutableEntityBoundingBox;
 import org.diorite.utils.math.pack.IntsToLong;
+import org.diorite.utils.others.Premium;
 
 import gnu.trove.TIntCollection;
 import gnu.trove.list.array.TIntArrayList;
@@ -465,6 +466,12 @@ public class PlayerImpl extends LivingEntityImpl implements Player
     public void updateInventory()
     {
         this.inventory.update(this);
+    }
+
+    @Override
+    public boolean hasPremium()
+    {
+        return Premium.hasPremium(getName());
     }
 
     protected final DioriteRandom random = DioriteRandomUtils.newRandom();

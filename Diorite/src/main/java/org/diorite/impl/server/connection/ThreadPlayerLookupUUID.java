@@ -14,6 +14,7 @@ import org.diorite.impl.auth.exceptions.AuthenticationUnavailableException;
 import org.diorite.impl.connection.MinecraftEncryption;
 import org.diorite.impl.server.connection.listeners.LoginListener;
 import org.diorite.cfg.DioriteConfig.OnlineMode;
+import org.diorite.utils.others.Premium;
 
 public class ThreadPlayerLookupUUID extends Thread
 {
@@ -33,7 +34,7 @@ public class ThreadPlayerLookupUUID extends Thread
         final GameProfile oldProfile = this.loginListener.getGameProfile();
         try
         {
-            if (this.loginListener.getOnlineMode() != OnlineMode.TRUE) // TODO
+            if (this.loginListener.getOnlineMode() == OnlineMode.FALSE || this.loginListener.getOnlineMode() == OnlineMode.AUTO && ! Premium.hasPremium(oldProfile.getName())) // TODO
             {
                 this.loginListener.setUUID(UUID.nameUUIDFromBytes(("OfflinePlayer:" + oldProfile.getName()).getBytes(StandardCharsets.UTF_8)));
                 this.allow();
@@ -75,7 +76,20 @@ public class ThreadPlayerLookupUUID extends Thread
     {
         final GameProfile profile = this.loginListener.getGameProfile();
         //noinspection ObjectToString
-        this.loginListener.getLogger().info("Player " + profile.getName() + " (" + profile.getId() + ") [" + this.loginListener.getNetworkManager().getSocketAddress() + "] connected to server! (online-mode: " + this.loginListener.getOnlineMode() + ")");
+        String account = "";
+        switch (this.loginListener.getOnlineMode())
+        {
+            case FALSE:
+                account = "CRACKED";
+                break;
+            case TRUE:
+                account = "PREMIUM";
+                break;
+            case AUTO:
+                account = (Premium.hasPremium(profile.getName()) ? "PREMIUM" : "CRACKED");
+                break;
+        }
+        this.loginListener.getLogger().info("Player " + profile.getName() + " (" + profile.getId() + ") [" + this.loginListener.getNetworkManager().getSocketAddress() + "] connected to server! (online-mode: " + this.loginListener.getOnlineMode() + ") (account: " + account + ")");
         this.loginListener.setProtocolState(LoginListener.ProtocolState.READY_TO_ACCEPT);
         this.onSuccess.run();
     }

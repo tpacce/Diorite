@@ -31,6 +31,9 @@ import org.diorite.impl.server.connection.ThreadPlayerLookupUUID;
 import org.diorite.cfg.DioriteConfig.OnlineMode;
 import org.diorite.chat.component.BaseComponent;
 import org.diorite.chat.component.TextComponent;
+import org.diorite.event.EventType;
+import org.diorite.event.player.PlayerSkinEvent;
+import org.diorite.utils.others.Premium;
 
 public class LoginListener implements PacketLoginClientListener
 {
@@ -91,7 +94,7 @@ public class LoginListener implements PacketLoginClientListener
     {
         Validate.validState(this.protocolState == ProtocolState.HELLO, "Unexpected hello packet");
         this.gameProfile = packet.getProfile();
-        if (this.onlineMode == OnlineMode.TRUE) // TODO
+        if (this.onlineMode == OnlineMode.TRUE || this.onlineMode == OnlineMode.AUTO && Premium.hasPremium(this.gameProfile.getName())) // TODO
         {
             this.protocolState = ProtocolState.KEY;
             this.networkManager.sendPacket(new PacketLoginServerEncryptionBegin(this.serverID, this.core.getKeyPair().getPublic(), this.token));
@@ -129,6 +132,9 @@ public class LoginListener implements PacketLoginClientListener
             this.networkManager.setProtocol(EnumProtocol.PLAY);
 
             PlayerImpl player = this.core.getPlayersManager().createPlayer(this.gameProfile, this.networkManager);
+
+            EventType.callEvent(new PlayerSkinEvent(player));
+
             this.networkManager.setPacketListener(new PlayListener(LoginListener.this.core, LoginListener.this.networkManager, player));
             this.core.getPlayersManager().playerJoin(player);
         });
